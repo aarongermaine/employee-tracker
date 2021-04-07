@@ -21,13 +21,34 @@ const initialPrompt = () => {
     })
     .then((answer) => {
       if (answer.mainMenu === "ADD") {
-        addEmployee();
+        addMainMenu();
       } else if (answer.mainMenu === "VIEW") {
         viewEmployee();
       } else if (answer.mainMenu === "UPDATE") {
         updateEmployee();
       } else {
         connection.end();
+      }
+    });
+};
+
+const addMainMenu = () => {
+  inquirer
+    .prompt({
+      name: "addMenu",
+      type: "list",
+      message: "Would you like to ADD a EMPLOYEE, ROLE, or DEPARTMENT?",
+      choices: ["EMPLOYEE", "ROLE", "DEPARTMENT", "MAIN MENU"],
+    })
+    .then((answer) => {
+      if (answer.addMenu === "EMPLOYEE") {
+        addEmployee();
+      } else if (answer.addMenu === "ROLE") {
+        addRole();
+      } else if (answer.addMenu === "DEPARTMENT") {
+        addDepartment();
+      } else {
+        initialPrompt();
       }
     });
 };
@@ -81,9 +102,15 @@ const addEmployee = () => {
 };
 
 const viewEmployee = () => {
-  connection.query("");
+  connection.query("SELECT * FROM ");
 };
 
 const updateEmployee = () => {
   connection.query("");
 };
+
+connection.connect((err) => {
+  if (err) throw err;
+
+  initialPrompt();
+});
