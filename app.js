@@ -1,7 +1,6 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 
-// create the connection
 const connection = mysql.createConnection({
   host: "localhost",
   port: 3306,
@@ -23,7 +22,7 @@ const initialPrompt = () => {
       if (answer.mainMenu === "ADD") {
         addMainMenu();
       } else if (answer.mainMenu === "VIEW") {
-        viewEmployee();
+        viewMainMenu();
       } else if (answer.mainMenu === "UPDATE") {
         updateEmployee();
       } else {
@@ -101,8 +100,132 @@ const addEmployee = () => {
     });
 };
 
+const addRole = () => {
+  inquirer
+    .prompt([
+      {
+        name: "roleID",
+        type: "input",
+        message: "What is the ID number of the role?",
+      },
+      {
+        name: "roleTitle",
+        type: "input",
+        message: "What is the title of the role?",
+      },
+      {
+        name: "roleSalary",
+        type: "input",
+        message: "What is the salary of the role?",
+      },
+      {
+        name: "roleDepartmentID",
+        type: "input",
+        message: "What is the departments Role ID?",
+      },
+    ])
+    .then((answer) => {
+      connection.query(
+        "INSERT INTO role SET ?",
+        {
+          id: answer.roleID,
+          title: answer.roleTitle,
+          salary: answer.roleSalary,
+          department_id: answer.roleDepartmentID,
+        },
+        (err) => {
+          if (err) throw err;
+          console.log("Role has been added!");
+          initialPrompt();
+        }
+      );
+    });
+};
+
+const addDepartment = () => {
+  inquirer
+    .prompt([
+      {
+        name: "departmentID",
+        type: "input",
+        message: "What is the ID of the department?",
+      },
+      {
+        name: "departmentTitle",
+        type: "input",
+        message: "What is the title of the department?",
+      },
+    ])
+    .then((answer) => {
+      connection.query(
+        "INSERT INTO department SET ?",
+        {
+          id: answer.departmentID,
+          name: answer.departmentTitle,
+        },
+        (err) => {
+          if (err) throw err;
+          console.log("Department has been added!");
+          initialPrompt();
+        }
+      );
+    });
+};
+
+const viewMainMenu = () => {
+  inquirer
+    .prompt({
+      name: "viewMenu",
+      type: "list",
+      message: "Would you like to VIEW a EMPLOYEE, ROLE, or DEPARTMENT?",
+      choices: ["EMPLOYEE", "ROLE", "DEPARTMENT", "MAIN MENU"],
+    })
+    .then((answer) => {
+      if (answer.viewMenu === "EMPLOYEE") {
+        viewEmployee();
+      } else if (answer.viewMenu === "ROLE") {
+        viewRole();
+      } else if (answer.viewMenu === "DEPARTMENT") {
+        viewDepartment();
+      } else {
+        initialPrompt();
+      }
+    });
+};
+
 const viewEmployee = () => {
-  connection.query("SELECT * FROM ");
+  connection.query("SELECT * FROM employee", (err, res) => {
+    if (err) throw err;
+    res.forEach(({ id, first_name, last_name, role_id, manager_id }) => {
+      console.log(
+        `${id} | ${first_name} | ${last_name} | ${role_id} | ${manager_id}`
+      );
+    });
+    console.log("-----------------------------------");
+    viewMainMenu();
+  });
+};
+
+const viewRole = () => {
+  connection.query("SELECT * FROM role", (err, res) => {
+    if (err) throw err;
+    res.forEach(({ id, title, salary, department_id }) => {
+      console.log(`${id} | ${title} | ${salary} | ${department_id}`);
+    });
+    console.log("-----------------------------------");
+    viewMainMenu();
+  });
+};
+
+const viewDepartment = () => {
+  connection.query("SELECT * FROM department", (err, res) => {
+    if (err) throw err;
+    res.forEach(({ id, name }) => {
+      console.log(`${id} | ${name} `);
+    });
+    console.log("-----------------------------------");
+    viewMainMenu();
+  });
 };
 
 const updateEmployee = () => {
