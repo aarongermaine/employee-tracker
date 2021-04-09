@@ -24,7 +24,7 @@ const initialPrompt = () => {
       } else if (answer.mainMenu === "VIEW") {
         viewMainMenu();
       } else if (answer.mainMenu === "UPDATE") {
-        updateEmployee();
+        updateMainMenu();
       } else {
         connection.end();
       }
@@ -221,15 +221,143 @@ const viewDepartment = () => {
   connection.query("SELECT * FROM department", (err, res) => {
     if (err) throw err;
     res.forEach(({ id, name }) => {
-      console.log(`${id} | ${name} `);
+      console.log(`${id} | ${name}`);
     });
     console.log("-----------------------------------");
     viewMainMenu();
   });
 };
 
+const updateMainMenu = () => {
+  inquirer
+    .prompt({
+      name: "updateMenu",
+      type: "list",
+      message: "Would you like to UPDATE a EMPLOYEE, ROLE, or DEPARTMENT?",
+      choices: ["EMPLOYEE", "ROLE", "DEPARTMENT", "MAIN MENU"],
+    })
+    .then((answer) => {
+      if (answer.updateMenu === "EMPLOYEE") {
+        updateEmployee();
+      } else if (answer.updateMenu === "ROLE") {
+        updateRole();
+      } else if (answer.updateMenu === "DEPARTMENT") {
+        updateDepartment();
+      } else {
+        initialPrompt();
+      }
+    });
+};
+
 const updateEmployee = () => {
-  connection.query("");
+  connection.query("SELECT * FROM employee", (err, results) => {
+    if (err) throw err;
+    inquirer
+      .prompt([
+        {
+          name: "choice",
+          type: "rawlist",
+          choices() {
+            const employeeArray = [];
+            results.forEach(({ first_name }) => {
+              employeeArray.push(first_name);
+            });
+            return employeeArray;
+          },
+          message: "Which employee would you like to update?",
+        },
+      ])
+      .then((answer) => {
+        let chosenEmployee;
+        results.forEach((employee) => {
+          if (employee.first_name === answer.choice) {
+            chosenEmployee = employee;
+            connection.query("DELETE FROM employee WHERE ?", [
+              {
+                first_name: answer.choice,
+              },
+            ]);
+          } else {
+            console.log("Ready to update..");
+          }
+        });
+        addEmployee();
+      });
+  });
+};
+
+const updateRole = () => {
+  connection.query("SELECT * FROM role", (err, results) => {
+    if (err) throw err;
+    inquirer
+      .prompt([
+        {
+          name: "choice",
+          type: "rawlist",
+          choices() {
+            const roleArray = [];
+            results.forEach(({ title }) => {
+              roleArray.push(title);
+            });
+            return roleArray;
+          },
+          message: "Which role would you like to update?",
+        },
+      ])
+      .then((answer) => {
+        let chosenRole;
+        results.forEach((role) => {
+          if (role.title === answer.choice) {
+            chosenRole = role;
+            connection.query("DELETE FROM role WHERE ?", [
+              {
+                title: answer.choice,
+              },
+            ]);
+          } else {
+            console.log("Ready to update..");
+          }
+        });
+        addRole();
+      });
+  });
+};
+
+const updateDepartment = () => {
+  connection.query("SELECT * FROM department", (err, results) => {
+    if (err) throw err;
+    inquirer
+      .prompt([
+        {
+          name: "choice",
+          type: "rawlist",
+          choices() {
+            const departmentArray = [];
+            results.forEach(({ name }) => {
+              departmentArray.push(name);
+            });
+            return departmentArray;
+          },
+          message: "Which department would you like to update?",
+        },
+      ])
+      .then((answer) => {
+        let chosenDepartment;
+        results.forEach((department) => {
+          if (department.title === answer.choice) {
+            chosenDepartment = department;
+            connection.query("DELETE FROM department WHERE ?", [
+              {
+                title: answer.choice,
+              },
+            ]);
+          } else {
+            console.log("Ready to update..");
+          }
+        });
+        addDepartment();
+      });
+  });
 };
 
 connection.connect((err) => {
